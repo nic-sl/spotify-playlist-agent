@@ -1,0 +1,50 @@
+analyze_prompt:
+  description: >
+    Break down the user’s playlist request into actionable parameters such as
+    genre, mood, tempo, era, and constraints (length, popularity, obscurity).
+    
+    The user request:
+    {request}
+  agent: researcher_agent
+  expected_output: >
+    A structured playlist blueprint including:
+      - Target genres and subgenres
+      - Desired mood/energy level
+      - Tempo or activity alignment (e.g., workout, chill)
+      - Era or release year constraints
+      - Playlist length recommendation
+      - Any special instructions (e.g., only female artists, no explicit lyrics)
+
+curate_playlist:
+  description: >
+    Select and sequence tracks that fit the blueprint, ensuring cohesion,
+    smooth transitions, and balance between popular tracks and hidden gems.
+  agent: curator_agent
+  expected_output: >
+    A curated list of Spotify track URIs with:
+      - Ordered sequencing for flow
+      - Mix of mainstream and niche tracks
+      - Playlist title and description
+      - Justification notes for sequencing choices
+
+validate_tracks:
+  description: >
+    Verify track availability on Spotify, check for duplicates, and ensure
+    regional accessibility. Handle edge cases where tracks are missing.
+  agent: connector_agent
+  expected_output: >
+    A finalized list of Spotify track URIs that are:
+      - Available in the user’s region
+      - Free of duplicates
+      - Properly formatted for playlist creation
+
+publish_playlist:
+  description: >
+    Create the playlist on Spotify using the API, apply metadata (title,
+    description, cover image), and make it shareable.
+  agent: connector_agent
+  expected_output: >
+    A live Spotify playlist link with:
+      - Correct title and description
+      - Cover image applied
+      - Public or private visibility as requested

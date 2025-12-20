@@ -1,0 +1,67 @@
+import time
+import requests
+import os
+
+class SpotifyTokenManager:
+    _token = None
+    _expires_at = 0
+    _refresh_token = None
+
+    AUTH_URL = "https://accounts.spotify.com/api/token"
+
+    @classmethod
+    def from_json(cls, tokens: dict):
+        """
+        Initialize the manager directly from the Spotify token JSON.
+        Expected keys: access_token, expires_in, refresh_token
+        """
+        access_token = tokens.get("access_token")
+        expires_in = tokens.get("expires_in", 3600)
+        refresh_token = tokens.get("refresh_token")
+
+        if not access_token:
+            raise ValueError("Missing access_token in token JSON")
+
+        cls._token = access_token
+        cls._expires_at = time.time() + expires_in - 30  # buffer
+        cls._refresh_token = refresh_token
+
+    @classmethod
+    def get_token(cls) -> str:
+        """
+        Return a valid token, refreshing if expired.
+        """
+        if cls._token is None or time.time() >= cls._expires_at:
+            cls._refresh_access_token()
+        return cls._token
+
+    @classmethod
+    def _refresh_access_token(cls):
+        """
+        Refresh the token using the refresh_token if available,
+        otherwise fall back to client credentials.
+        """
+        client_id = os.getenv("SPOTIFY_CLIENT_ID")
+        client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+
+        if cls._refresh_token:
+            response = requests.post(
+                cls.AUTH_URL,
+                data={
+                    "grant_type": "refresh_token",
+                    "refresh_token": cls._refresh_token,
+                },
+                auth=(client_id, client_secret),
+            )
+        else:
+            response = requests.post(
+                cls.AUTH_URL,
+                data={"grant_type": "client_credentials"},
+                auth=(client_id, client_secret),
+            )
+
+        if response.status_code != 200:
+            raise Exception(f"Failed to refresh token: {response.text}")
+
+        data = response.json()
+        cls.from_json(data)

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat - Spotify Playlist Agent</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji"; margin: 2rem; }
+        .card { max-width: 680px; margin: 0 auto; padding: 1.5rem; border: 1px solid #ddd; border-radius: 12px; }
+        .row { display: flex; gap: 0.5rem; }
+        input[type="text"] { flex: 1; padding: 0.75rem; border-radius: 8px; border: 1px solid #ccc; }
+        button { padding: 0.75rem 1rem; border-radius: 8px; color: white; background: #1DB954; border: none; cursor: pointer; font-weight: 600; }
+        button:hover { filter: brightness(0.95); }
+        .muted { color: #666; font-size: 0.95rem; }
+        .result { margin-top: 1rem; padding: 0.75rem; background: #f7f7f7; border-radius: 8px; border: 1px solid #eee; white-space: pre-wrap; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h2>Chat</h2>
+            <div class="muted">Signed in as: {{ user.display_name }} {% if user.mock %}(mock){% endif %}</div>
+        </div>
+        <form id="form" method="post" action="/api/create" onsubmit="return submitForm(event)">
+            <div class="row">
+                <input id="prompt" name="prompt" type="text" placeholder="Describe what you want to create..." required />
+                <button id="createBtn" type="submit">Create</button>
+            </div>
+        </form>
+        <div id="status" class="muted" style="margin-top:0.75rem; display:none;"></div>
+        <div id="output" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        async function submitForm(e) {
+            e.preventDefault();
+            const form = document.getElementById('form');
+            const data = new FormData(form);
+            const btn = document.getElementById('createBtn');
+            const statusEl = document.getElementById('status');
+            const out = document.getElementById('output');
+
+            // Reset UI
+            out.style.display = 'none';
+            out.textContent = '';
+
+            // Disable button and show creating message
+            btn.disabled = true;
+            statusEl.style.display = 'block';
+            statusEl.textContent = 'Creating your playlist...';
+
+            try {
+                const res = await fetch('/api/create', { method: 'POST', body: data });
+                const json = await res.json();
+
+                // Success message
+                statusEl.textContent = 'Successfully created the playlist!';
+
+                // Show meaningful output if present and non-null
+                if (json && typeof json === 'object') {
+                    const cleaned = JSON.parse(JSON.stringify(json, (k, v) => (v === null ? undefined : v)));
+                    const hasKeys = cleaned && Object.keys(cleaned).length > 0;
+                    if (hasKeys) {
+                        out.style.display = 'block';
+                        out.textContent = JSON.stringify(cleaned, null, 2);
+                    }
+                }
+            } catch (err) {
+                statusEl.textContent = 'There was an error creating the playlist.';
+            } finally {
+                btn.disabled = false;
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>
