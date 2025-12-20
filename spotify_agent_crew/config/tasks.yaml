@@ -17,11 +17,11 @@ analyze_prompt:
 
 curate_playlist:
   description: >
-    Select and sequence tracks that fit the blueprint, ensuring cohesion,
+    Select and sequence a maximum of 20 tracks that fit the blueprint, ensuring cohesion,
     smooth transitions, and balance between popular tracks and hidden gems.
   agent: curator_agent
   expected_output: >
-    A curated list of Spotify track URIs with:
+    A curated list of suggested songs with:
       - Ordered sequencing for flow
       - Mix of mainstream and niche tracks
       - Playlist title and description
@@ -31,9 +31,9 @@ validate_tracks:
   description: >
     Verify track availability on Spotify, check for duplicates, and ensure
     regional accessibility. Handle edge cases where tracks are missing.
-  agent: connector_agent
+  agent: track_validator_agent
   expected_output: >
-    A finalized list of Spotify track URIs that are:
+    A finalized list of valid Spotify track URIs that are:
       - Available in the user’s region
       - Free of duplicates
       - Properly formatted for playlist creation
@@ -41,10 +41,10 @@ validate_tracks:
 publish_playlist:
   description: >
     Create the playlist on Spotify using the API, apply metadata (title,
-    description, cover image), and make it shareable.
-  agent: connector_agent
+    description), and make it shareable. If it's not possible to create the playlist,
+    do not try to use the available tracks and the available tools more than once.
+  agent: playlist_publisher_agent
   expected_output: >
     A live Spotify playlist link with:
       - Correct title and description
-      - Cover image applied
       - Public or private visibility as requested

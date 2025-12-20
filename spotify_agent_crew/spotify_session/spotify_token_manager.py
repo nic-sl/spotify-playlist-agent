@@ -61,7 +61,7 @@ class SpotifyTokenManager:
             )
 
         if response.status_code != 200:
-            raise Exception(f"Failed to refresh token: {response.text}")
+            raise RuntimeError(f"Failed to refresh token: {response.text}")
 
         data = response.json()
         cls.from_json(data)

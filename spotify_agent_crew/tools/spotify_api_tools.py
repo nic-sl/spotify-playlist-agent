@@ -1,7 +1,7 @@
 import os
 import requests
 from typing import List, Dict
-from crewai.tools import BaseTool, tool
+from crewai.tools import tool
 
 from spotify_agent_crew.spotify_session.spotify_token_manager import SpotifyTokenManager
 from spotify_agent_crew.spotify_session.spotify_app_user import SpotifyAppUser
@@ -63,7 +63,7 @@ class SpotifyAPITools:
         return uris
 
     @tool
-    def create_playlist(playlist_name: str, track_uris: List[str]) -> str:
+    def create_playlist(playlist_name: str, track_uris: List[str]):
         """
         Create a playlist for a given user and add tracks to it.
         Uses SpotifyTokenManager to retrieve a valid OAuth token.
@@ -77,7 +77,7 @@ class SpotifyAPITools:
             "Content-Type": "application/json"
         }
 
-        # Step 1: Create playlist
+        # Step 1: Create the playlist
         payload = {"name": playlist_name, "public": False}
         response = requests.post(
             f"{SpotifyAPITools.BASE_URL}/users/{SpotifyAppUser.get_id()}/playlists",
@@ -96,6 +96,4 @@ class SpotifyAPITools:
 
         if response.status_code not in (200, 201):
             raise Exception(f"Failed to add tracks: {response.text}")
-
-        return
 

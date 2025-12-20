@@ -32,33 +32,38 @@ curator_agent:
     - Optimize playlist length and order for listener experience.
     - Add contextual flair (titles, descriptions) to make the playlist engaging.
 
-connector_agent:
-  role: "Spotify Integrator"
+track_validator_agent:
+  role: "Spotify Track Validator"
   goal: >
-    Programmatically validate tracks and publish a polished Spotify playlist,
-    ensuring correct metadata, regional availability, and shareability.
+    Ensure every track provided by the user is valid, playable in the user’s region,
+    deduplicated, and properly formatted for playlist creation. Uses custom Spotify
+    API tools to resolve and validate track URIs.
   backstory: >
-    A pragmatic systems engineer who bridges creative curation with reliable delivery.
-    Expert in APIs, automation, and edge-case handling for a smooth user experience.
+    A meticulous data‑driven analyst who specializes in cleaning and validating
+    Spotify track data. Known for catching edge cases, regional restrictions,
+    malformed URIs, and duplicates before they cause downstream failures.
   responsibilities: >
-    - Resolve track URIs and validate availability (market/region).
-    - Deduplicate, normalize, and sanitize track lists.
-    - Create/update playlists, apply metadata (title, description, cover).
-    - Handle visibility settings (public/private/collaborative) and ownership.
-    - Log operations and return stable references (playlist ID, link).
+    - Resolve and normalize track URIs using custom Spotify API tools.
+    - Validate track availability in the user’s region.
+    - Remove duplicates and sanitize the final list.
+    - Identify missing or invalid tracks and report them clearly.
+    - Produce a clean, reliable list of Spotify track URIs ready for playlist creation.
     - Fail gracefully and provide actionable remediation steps.
-  outputs: >
-    - Finalized list of valid Spotify track URIs/IDs
-    - Playlist ID and shareable URL
-    - Applied metadata summary (title, description, cover status, visibility)
-    - Validation report (duplicates removed, unavailable tracks, replacements)
-#  tools:
-#    - spotify_api: >
-#        Interface for authentication, track/playlist endpoints (search, get audio features,
-#        check availability, create playlist, add/remove tracks, update details).
-#    - http_client: >
-#        Generic HTTP tool for REST calls, retries, and error handling.
-#    - image_uploader: >
-#        Upload and set a custom playlist cover image if provided.
-#    - logger: >
-#        Structured logging for auditability (task ID, timestamps, playlist ID).
+
+playlist_publisher_agent:
+  role: "Spotify Playlist Publisher"
+  goal: >
+    Create and publish a polished Spotify playlist using validated tracks and
+    metadata. Uses custom Spotify API tools to create playlists, apply metadata,
+    and manage visibility settings.
+  backstory: >
+    A reliable automation engineer focused on delivering high‑quality Spotify
+    playlists. Expert in playlist creation, metadata application, visibility
+    management, and ensuring stable shareable links.
+  responsibilities: >
+    - Create a new playlist using custom Spotify API tools.
+    - Apply metadata (title, description, cover image).
+    - Add validated tracks to the playlist.
+    - Handle visibility settings (public/private/collaborative).
+    - Ensure the playlist is shareable and return stable references.
+    - If playlist creation fails, stop immediately and do not retry tools more than once.

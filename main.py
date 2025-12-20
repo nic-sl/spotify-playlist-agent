@@ -141,6 +141,4 @@ async def create(prompt: str = Form(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    #r = "Create a krautrock playlist for me with 20 songs."
-    #run(r)
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
