@@ -8,6 +8,8 @@ from spotify_agent_crew.spotify_session.spotify_app_user import SpotifyAppUser
 
 from typing import List
 
+
+# noinspection PyMethodParameters
 class SpotifyAPITools:
     # Spotify API endpoints
     AUTH_URL: str = "https://accounts.spotify.com/api/token"
@@ -103,10 +105,10 @@ class SpotifyAPITools:
         return uris
 
     @tool
-    def get_tracks(artists: List[str]) -> List[str]:
+    def get_tracks(artists: List[str]) -> List[str]: #NOSONAR - Tools cannot have self as first argument
         """
         Given a list of artist names, fetch the top 3 tracks for each artist
-        using get_top_tracks(), and return a combined list of all URIs.
+        using get_top_tracks() and return a combined list of all URIs.
         Raises RuntimeError if any artist lookup fails.
         """
         all_tracks: List[str] = []
@@ -128,7 +130,7 @@ class SpotifyAPITools:
         return all_tracks
 
     @tool
-    def create_playlist(playlist_name: str, playlist_description: str, track_uris: List[str]):
+    def create_playlist(playlist_name: str, playlist_description: str, track_uris: List[str]): #NOSONAR - Tools cannot have self as first argument
         """
         Create a playlist for a given user and add tracks to it individually.
         If a track fails to add, skip it and continue.
@@ -154,7 +156,7 @@ class SpotifyAPITools:
         )
 
         if response.status_code not in (200, 201):
-            raise Exception(f"Failed to create playlist: {response.text}")
+            raise RuntimeError(f"Failed to create playlist: {response.text}")
 
         playlist_id = response.json()["id"]
 

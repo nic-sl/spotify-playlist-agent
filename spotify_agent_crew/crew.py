@@ -14,6 +14,8 @@ def run(request: str = None):
     except Exception as e:
         raise RuntimeError(f"An error occurred while running the crew: {e}")
 
+
+# noinspection PyArgumentList
 @CrewBase
 class SpotifyAgentCrew:
     agents: List[BaseAgent]

@@ -6,7 +6,7 @@ from typing import Optional
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.templating import Jinja2Templates
 
@@ -89,7 +89,7 @@ async def callback(request: Request, code: Optional[str] = None, state: Optional
     async with httpx.AsyncClient(timeout=15.0) as client:
         token_resp = await client.post(SPOTIFY_TOKEN_URL, data=data, headers=headers)
         if token_resp.status_code != 200:
-            return RedirectResponse(url=f"/?error=token_exchange_failed")
+            return RedirectResponse(url="/?error=token_exchange_failed")
         tokens = token_resp.json()
 
         # Optionally fetch user profile to display name
