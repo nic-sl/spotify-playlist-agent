@@ -1,3 +1,11 @@
+"""Utilities that wrap Spotify Web API endpoints as CrewAI tools.
+
+The tools here assume that authentication is already handled elsewhere. For
+client-credential flows, `_get_token()` is provided internally. For user-
+scoped actions like creating playlists, the `SpotifyTokenManager` provides a
+valid user token and `SpotifyAppUser` supplies the active user context.
+"""
+
 from crewai.tools import tool
 
 import os
@@ -8,18 +16,26 @@ from spotify_agent_crew.spotify_session.spotify_app_user import SpotifyAppUser
 
 from typing import List
 
-
 # noinspection PyMethodParameters
 class SpotifyAPITools:
+    """Static helpers and CrewAI tools for interacting with Spotify APIs.
+
+    Methods prefixed with an underscore are internal helpers. Public methods
+    decorated with `@tool` are exposed to agents within CrewAI workflows.
+    """
     # Spotify API endpoints
     AUTH_URL: str = "https://accounts.spotify.com/api/token"
     BASE_URL: str = "https://api.spotify.com/v1"
 
     @staticmethod
     def _get_token() -> str:
-        """
-        Retrieve a Spotify access token using Client Credentials flow.
-        Client ID and Secret should be stored in environment variables.
+        """Fetch an app access token via the Client Credentials flow.
+
+        Environment variables `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`
+        must be set.
+
+        Returns:
+            A bearer token string to call app-scoped endpoints.
         """
         client_id = os.getenv("SPOTIFY_CLIENT_ID")
         client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
@@ -40,11 +56,17 @@ class SpotifyAPITools:
 
     @staticmethod
     def _get_top_tracks(artist_name: str) -> List[str]:
-        """
-        Given an artist NAME, search Spotify for the artist ID,
-        then fetch the artist's top tracks.
-        Returns a list of Spotify track URIs.
-        Raises RuntimeError on any unexpected API behavior.
+        """Resolve an artist name to top track URIs.
+
+        Parameters:
+            artist_name: Free-form artist name to search.
+
+        Returns:
+            List of Spotify track URIs for the artist's top tracks in the
+            current user market.
+
+        Raises:
+            RuntimeError: On HTTP errors or unexpected/empty responses.
         """
         token = SpotifyAPITools._get_token()
         headers = {"Authorization": f"Bearer {token}"}
@@ -106,10 +128,16 @@ class SpotifyAPITools:
 
     @tool
     def get_tracks(artists: List[str]) -> List[str]: #NOSONAR - Tools cannot have self as first argument
-        """
-        Given a list of artist names, fetch the top 3 tracks for each artist
-        using get_top_tracks() and return a combined list of all URIs.
-        Raises RuntimeError if any artist lookup fails.
+        """Return up to 3 top track URIs for each provided artist name.
+
+        Parameters:
+            artists: List of artist names to look up.
+
+        Returns:
+            Combined list of track URIs (max three per artist).
+
+        Raises:
+            RuntimeError: If an artist lookup or top track retrieval fails.
         """
         all_tracks: List[str] = []
 
@@ -131,9 +159,22 @@ class SpotifyAPITools:
 
     @tool
     def create_playlist(playlist_name: str, playlist_description: str, track_uris: List[str]): #NOSONAR - Tools cannot have self as first argument
-        """
-        Create a playlist for a given user and add tracks to it individually.
-        If a track fails to add, skip it and continue.
+        """Create a private playlist for the current user and add tracks.
+
+        Adds tracks one by one; failures are skipped so the operation is
+        best-effort.
+
+        Parameters:
+            playlist_name: Name of the new playlist.
+            playlist_description: Description for the playlist.
+            track_uris: URIs of tracks to add.
+
+        Returns:
+            Dict containing the created `playlist_id` and the list of
+            successfully `added_tracks` URIs.
+
+        Raises:
+            RuntimeError: If playlist creation fails.
         """
         token = SpotifyTokenManager.get_token()
 

@@ -34,6 +34,11 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
+    """Render landing page.
+
+    Shows a "Login with Spotify" button and indicates whether real OAuth is
+    configured based on environment variables.
+    """
     spotify_configured = bool(SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET)
     return templates.TemplateResponse(
         "index.html",
@@ -45,6 +50,11 @@ async def index(request: Request):
 
 @app.get("/login")
 async def login(request: Request):
+    """Start the Spotify OAuth authorization flow.
+
+    Generates and stores a CSRF `state` in the session and redirects the user
+    to Spotify's authorize URL with required query parameters.
+    """
     state = secrets.token_urlsafe(16)
     request.session["oauth_state"] = state
     params = {
@@ -61,6 +71,12 @@ async def login(request: Request):
 
 @app.get("/callback")
 async def callback(request: Request, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
+    """Handle the OAuth redirect from Spotify.
+
+    Validates the CSRF `state`, exchanges the authorization code for tokens,
+    optionally fetches the profile of the authenticated user, persists token
+    and user info in the session and helper singletons, and redirects to /chat.
+    """
     # If Spotify isn't configured, just redirect to chat
     if not (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET):
         return RedirectResponse(url="/chat")
@@ -114,6 +130,7 @@ async def callback(request: Request, code: Optional[str] = None, state: Optional
 
 @app.get("/chat", response_class=HTMLResponse)
 async def chat(request: Request):
+    """Render the chat page for an authenticated session."""
     user = request.session.get("user")
     if not user:
         return RedirectResponse(url="/")
@@ -121,6 +138,10 @@ async def chat(request: Request):
 
 @app.post("/api/create")
 async def create(prompt: str = Form(...)):
+    """Trigger the crew pipeline using the provided `prompt`.
+
+    Currently delegates to `spotify_agent_crew.crew.run(prompt)`.
+    """
     spotify_agent_crew.crew.run(prompt)
 
 if __name__ == "__main__":
