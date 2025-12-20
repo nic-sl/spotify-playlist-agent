@@ -9,13 +9,9 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
-from importlib.util import spec_from_file_location, module_from_spec
 
-import spotify_agent_crew
-from spotify_agent_crew.crew import run
+import spotify_agent_crew.crew
 from spotify_agent_crew.spotify_session.spotify_token_manager import SpotifyTokenManager
-
 from spotify_agent_crew.spotify_session.spotify_app_user import SpotifyAppUser
 
 # Load environment variables from .env if present
@@ -36,10 +32,8 @@ app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET)
 # Templates
 templates = Jinja2Templates(directory="templates")
 
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    # Whether we will do a real Spotify login or a mock
     spotify_configured = bool(SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET)
     return templates.TemplateResponse(
         "index.html",
@@ -49,14 +43,8 @@ async def index(request: Request):
         },
     )
 
-
 @app.get("/login")
 async def login(request: Request):
-    # If Spotify not configured, mock a "login" and go to /chat
-    if not (SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET):
-        request.session["user"] = {"display_name": "Mock User", "mock": True}
-        return RedirectResponse(url="/chat")
-
     state = secrets.token_urlsafe(16)
     request.session["oauth_state"] = state
     params = {
@@ -70,7 +58,6 @@ async def login(request: Request):
     # Build the authorization URL
     qs = "&".join(f"{k}={httpx.QueryParams({k: v})[k]}" for k, v in params.items())
     return RedirectResponse(url=f"{SPOTIFY_AUTH_URL}?{qs}")
-
 
 @app.get("/callback")
 async def callback(request: Request, code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
@@ -119,12 +106,11 @@ async def callback(request: Request, code: Optional[str] = None, state: Optional
     request.session["tokens"] = tokens
     request.session["user"] = {
         "display_name": (me or {}).get("display_name") or (me or {}).get("id") or "Spotify User",
-        "mock": False,
+        "country": (me or {}).get("country"),
     }
     SpotifyTokenManager.from_json(tokens)
     SpotifyAppUser.from_json(me)
     return RedirectResponse(url="/chat")
-
 
 @app.get("/chat", response_class=HTMLResponse)
 async def chat(request: Request):
@@ -133,11 +119,9 @@ async def chat(request: Request):
         return RedirectResponse(url="/")
     return templates.TemplateResponse("chat.html", {"request": request, "user": user})
 
-
 @app.post("/api/create")
 async def create(prompt: str = Form(...)):
     spotify_agent_crew.crew.run(prompt)
-
 
 if __name__ == "__main__":
     import uvicorn

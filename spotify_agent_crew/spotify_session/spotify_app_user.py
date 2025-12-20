@@ -7,7 +7,7 @@ class SpotifyAppUser:
 
         self.id = user_json.get("id")
         self.display_name = user_json.get("display_name") or self.id or "Spotify User"
-        self.mock = user_json.get("mock", False)
+        self.country = user_json.get("country")
 
         SpotifyAppUser._instance = self
 
@@ -22,7 +22,7 @@ class SpotifyAppUser:
             # Optionally update the existing instance
             cls._instance.id = user_json.get("id", cls._instance.id)
             cls._instance.display_name = user_json.get("display_name", cls._instance.display_name)
-            cls._instance.mock = user_json.get("mock", cls._instance.mock)
+            cls._instance.country = user_json.get("country", cls._instance.country)
 
     @classmethod
     def get_instance(cls):
@@ -42,5 +42,5 @@ class SpotifyAppUser:
         return cls.get_instance().display_name
 
     @classmethod
-    def is_mock(cls) -> bool:
-        return cls.get_instance().mock
+    def get_country(cls) -> str:
+        return cls.get_instance().country

@@ -62,7 +62,7 @@
     <div class="card">
         <div class="header">
             <h2>Chat</h2>
-            <div class="muted">Signed in as: {{ user.display_name }} {% if user.mock %}(mock){% endif %}</div>
+            <div class="muted">Signed in as: {{ user.display_name }}</div>
         </div>
 
         <form id="form" method="post" action="/api/create" onsubmit="return submitForm(event)">

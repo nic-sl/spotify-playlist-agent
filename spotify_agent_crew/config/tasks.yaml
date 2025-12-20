@@ -1,50 +1,33 @@
 analyze_prompt:
   description: >
-    Break down the user’s playlist request into actionable parameters such as
-    genre, mood, tempo, era, and constraints (length, popularity, obscurity).
-    
+    Interpret the user’s playlist request and convert it into structured,
+    actionable parameters. Identify genre, mood, energy level, era, themes,
+    and any constraints such as playlist length, popularity level, or desired
+    obscurity.
+
     The user request:
     {request}
   agent: researcher_agent
   expected_output: >
-    A structured playlist blueprint including:
-      - Target genres and subgenres
-      - Desired mood/energy level
-      - Tempo or activity alignment (e.g., workout, chill)
-      - Era or release year constraints
-      - Playlist length recommendation
-      - Any special instructions (e.g., only female artists, no explicit lyrics)
+    A curated list of 10 seed artists that best represent the user’s intent
+    and will serve as the foundation for track selection.
 
-curate_playlist:
+define_tracks:
   description: >
-    Select and sequence a maximum of 20 tracks that fit the blueprint, ensuring cohesion,
-    smooth transitions, and balance between popular tracks and hidden gems.
-  agent: curator_agent
+    Take the 10 seed artists from the researcher agent and retrieve their top
+    or most relevant tracks using the available Spotify tools.
+  agent: track_selector_agent
   expected_output: >
-    A curated list of suggested songs with:
-      - Ordered sequencing for flow
-      - Mix of mainstream and niche tracks
-      - Playlist title and description
-      - Justification notes for sequencing choices
-
-validate_tracks:
-  description: >
-    Verify track availability on Spotify, check for duplicates, and ensure
-    regional accessibility. Handle edge cases where tracks are missing.
-  agent: track_validator_agent
-  expected_output: >
-    A finalized list of valid Spotify track URIs that are:
-      - Available in the user’s region
-      - Free of duplicates
-      - Properly formatted for playlist creation
+    A list of Spotify tracks URIs.
 
 publish_playlist:
   description: >
-    Create the playlist on Spotify using the API, apply metadata (title,
-    description), and make it shareable. If it's not possible to create the playlist,
-    do not try to use the available tracks and the available tools more than once.
+    Assemble and publish the final playlist on Spotify using the provided API
+    tools. Apply an appropriate title and description that matches the original user request.
+    Ensure the playlist is created only once and avoid retrying tool calls if creation fails.
+    
+    The user request:
+    {request}
   agent: playlist_publisher_agent
   expected_output: >
-    A live Spotify playlist link with:
-      - Correct title and description
-      - Public or private visibility as requested
+    The ID of the published playlist on Spotify.

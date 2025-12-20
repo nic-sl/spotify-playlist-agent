@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 from typing import List
 
-class SpotifyTrackURIs(BaseModel):
+class SpotifyTracksModel(BaseModel):
     uris: List[str]

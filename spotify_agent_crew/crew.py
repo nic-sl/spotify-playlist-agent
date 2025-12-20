@@ -2,18 +2,17 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 
-from typing import List
-
-from spotify_agent_crew.models.SpotifyTrackURIs import SpotifyTrackURIs
+from spotify_agent_crew.models.spotify_tracks_model import SpotifyTracksModel
+from spotify_agent_crew.models.spotify_artists_model import SpotifyArtistsModel
 from spotify_agent_crew.tools.spotify_api_tools import SpotifyAPITools
 
+from typing import List
 
 def run(request: str = None):
     try:
         SpotifyAgentCrew().crew().kickoff(inputs={"request": request})
     except Exception as e:
         raise RuntimeError(f"An error occurred while running the crew: {e}")
-
 
 @CrewBase
 class SpotifyAgentCrew:
@@ -28,18 +27,11 @@ class SpotifyAgentCrew:
         )
 
     @agent
-    def curator_agent(self) -> Agent:
+    def track_selector_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['curator_agent'],  # type: ignore[index]
+            config=self.agents_config['track_selector_agent'],  # type: ignore[index]
             verbose=True,
-        )
-
-    @agent
-    def track_validator_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config['track_validator_agent'],  # type: ignore[index]
-            verbose=True,
-            tools=[SpotifyAPITools.search_songs]
+            tools=[SpotifyAPITools.get_tracks]
         )
 
     @agent
@@ -53,27 +45,21 @@ class SpotifyAgentCrew:
     @task
     def analyze_prompt(self) -> Task:
         return Task(
-            config=self.tasks_config["analyze_prompt"]  # type: ignore[index]
+            config=self.tasks_config["analyze_prompt"],  # type: ignore[index]
+            output_json=SpotifyArtistsModel
         )
 
     @task
-    def curate_playlist(self) -> Task:
+    def define_tracks(self) -> Task:
         return Task(
-            config=self.tasks_config["curate_playlist"]  # type: ignore[index]
-        )
-
-    @task
-    def validate_tracks(self) -> Task:
-        return Task(
-            config=self.tasks_config["validate_tracks"],  # type: ignore[index]
-            output_json=SpotifyTrackURIs
+            config=self.tasks_config["define_tracks"],  # type: ignore[index]
+            output_json=SpotifyTracksModel
         )
 
     @task
     def publish_playlist(self) -> Task:
         return Task(
             config=self.tasks_config["publish_playlist"],  # type: ignore[index]
-            context=[self.validate_tracks()]
         )
 
     @crew
