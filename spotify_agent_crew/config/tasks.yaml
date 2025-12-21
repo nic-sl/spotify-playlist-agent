@@ -16,6 +16,8 @@ define_tracks:
   description: >
     Take the 10 seed artists from the researcher agent and retrieve their top
     or most relevant tracks using the available Spotify tools.
+    
+    If an artist does not have a Spotify profile, skip them from the selection.
   agent: track_selector_agent
   expected_output: >
     A list of Spotify tracks URIs.

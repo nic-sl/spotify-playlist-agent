@@ -10,8 +10,8 @@ from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
 
-from spotify_agent_crew.models.spotify_tracks_model import SpotifyTracksModel
-from spotify_agent_crew.models.spotify_artists_model import SpotifyArtistsModel
+from spotify_agent_crew.models.tracks_model import TracksModel
+from spotify_agent_crew.models.artists_model import ArtistsModel
 from spotify_agent_crew.tools.lastfm_api_tools import LastFmAPITools
 from spotify_agent_crew.tools.spotify_api_tools import SpotifyAPITools
 
@@ -76,7 +76,7 @@ class SpotifyAgentCrew:
         """Define the task that analyzes the user's request into artists."""
         return Task(
             config=self.tasks_config["analyze_prompt"],  # type: ignore[index]
-            output_json=SpotifyArtistsModel
+            output_json=ArtistsModel
         )
 
     @task
@@ -84,7 +84,7 @@ class SpotifyAgentCrew:
         """Define the task that selects tracks based on chosen artists."""
         return Task(
             config=self.tasks_config["define_tracks"],  # type: ignore[index]
-            output_json=SpotifyTracksModel
+            output_json=TracksModel
         )
 
     @task
