@@ -127,7 +127,7 @@ class SpotifyAPITools:
         return uris
 
     @tool
-    def get_tracks(artists: List[str]) -> List[str]: #NOSONAR - Tools cannot have self as first argument
+    def get_tracks(artists: List[str]) -> List[str]: #NOSONAR - Tools cannot have self as the first argument
         """Return up to 3 top track URIs for each provided artist name.
 
         Parameters:
@@ -158,7 +158,7 @@ class SpotifyAPITools:
         return all_tracks
 
     @tool
-    def create_playlist(playlist_name: str, playlist_description: str, track_uris: List[str]): #NOSONAR - Tools cannot have self as first argument
+    def create_playlist(playlist_name: str, playlist_description: str, track_uris: List[str]): #NOSONAR - Tools cannot have self as the first argument
         """Create a private playlist for the current user and add tracks.
 
         Adds tracks one by one; failures are skipped so the operation is

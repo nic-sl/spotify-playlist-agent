@@ -12,6 +12,7 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 
 from spotify_agent_crew.models.spotify_tracks_model import SpotifyTracksModel
 from spotify_agent_crew.models.spotify_artists_model import SpotifyArtistsModel
+from spotify_agent_crew.tools.lastfm_api_tools import LastFmAPITools
 from spotify_agent_crew.tools.spotify_api_tools import SpotifyAPITools
 
 from typing import List
@@ -49,6 +50,7 @@ class SpotifyAgentCrew:
         return Agent(
             config=self.agents_config['researcher_agent'],  # type: ignore[index]
             verbose=True,
+            tools=[LastFmAPITools.get_similar_artists]
         )
 
     @agent
