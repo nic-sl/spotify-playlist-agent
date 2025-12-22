@@ -1,7 +1,7 @@
 [project]
 name = "spotify-playlist-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "An AI-assisted web app that builds Spotify playlists from a natural-language prompt. "
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0",
