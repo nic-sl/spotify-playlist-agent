@@ -12,4 +12,5 @@ dependencies = [
     "itsdangerous>=2.2.0",
     "python-multipart>=0.0.9",
     "crewai[bedrock]>=1.7.1",
+    "spotipy>=2.24.0",
 ]
