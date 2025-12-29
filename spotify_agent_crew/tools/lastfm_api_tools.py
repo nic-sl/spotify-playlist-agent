@@ -1,7 +1,7 @@
 import os
-from typing import Dict, List
-
 import requests
+
+from typing import Dict, List
 from crewai.tools import tool
 
 # noinspection PyMethodParameters
@@ -54,7 +54,6 @@ class LastFmAPITools:
 
         data = resp.json()
 
-        # Last.fm sometimes returns errors inside JSON even with 200 OK
         if "error" in data:
             raise RuntimeError(
                 f"[Last.fm API Error] Code {data.get('error')} - {data.get('message')}\n"
@@ -77,5 +76,4 @@ class LastFmAPITools:
                 f"Full response: {data}"
             )
 
-        # ✅ Return plain JSON that matches your Pydantic model structure
         return {"artists": names}
